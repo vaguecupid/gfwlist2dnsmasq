@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Name:        gfwlist2dnsmasq.sh
 # Desription:  A shell script which convert gfwlist into dnsmasq rules.
@@ -101,9 +101,11 @@ check_depends(){
 
 get_args(){
     OUT_TYPE='DNSMASQ_RULES'
-    DNS_IP='127.0.0.1'
-    DNS_PORT='5353'
-    IPSET_NAME=''
+    DNS_IP='192.168.1.254'
+    DNS_PORT=''
+    IP_PORT=''
+    IPSET_NAME='gfwlist'
+    OUT_FILE='/etc/dnsmasq.d/dnsmasq_gfwlist_ipset.conf'
     FILE_FULLPATH=''
     CURL_EXTARG=''
     WGET_EXTARG=''
@@ -183,10 +185,18 @@ get_args(){
         fi
 
         # Check DNS port
-        if [ $DNS_PORT -lt 1 -o $DNS_PORT -gt 65535 ]; then
-            _red 'Error: Please enter a valid DNS server port.\n'
-            exit 1
+        if [ $DNS_PORT ]; then
+            if [ $DNS_PORT -lt 1 -o $DNS_PORT -gt 65535 ]; then
+                _red 'Error: Please enter a valid DNS server port.\n'
+                exit 1
+            else
+               IP_PORT='\#'
+            fi
+        else
+            IP_PORT=''
         fi
+
+
 
         # Check ipset name
         if [ -z $IPSET_NAME ]; then
@@ -215,7 +225,8 @@ get_args(){
 
 process(){
     # Set Global Var
-    BASE_URL='https://github.com/gfwlist/gfwlist/raw/master/gfwlist.txt'
+    BASE_URL='https://raw.githubusercontent.com/Loukky/gfwlist-by-loukky/master/gfwlist.txt'
+    # BASE_URL='https://github.com/gfwlist/gfwlist/raw/master/gfwlist.txt'
     TMP_DIR=`mktemp -d /tmp/gfwlist2dnsmasq.XXXXXX`
     BASE64_FILE="$TMP_DIR/base64.txt"
     GFWLIST_FILE="$TMP_DIR/gfwlist.txt"
@@ -283,11 +294,11 @@ process(){
     # Convert domains into dnsmasq rules
         if [ $WITH_IPSET -eq 1 ]; then
             _green 'Ipset rules included.'
-            sort -u $DOMAIN_FILE | $SED_ERES 's#(.+)#server=/\1/'$DNS_IP'\#'$DNS_PORT'\
+            sort -u $DOMAIN_FILE | $SED_ERES 's#(.+)#server=/\1/'$DNS_IP$IP_PORT$DNS_PORT'\
 ipset=/\1/'$IPSET_NAME'#g' > $CONF_TMP_FILE
         else
             _green 'Ipset rules not included.'
-            sort -u $DOMAIN_FILE | $SED_ERES 's#(.+)#server=/\1/'$DNS_IP'\#'$DNS_PORT'#g' > $CONF_TMP_FILE
+            sort -u $DOMAIN_FILE | $SED_ERES 's#(.+)#server=/\1/'$DNS_IP$IP_PORT$DNS_PORT'#g' > $CONF_TMP_FILE
         fi
 
         # Generate output file
@@ -301,21 +312,27 @@ ipset=/\1/'$IPSET_NAME'#g' > $CONF_TMP_FILE
     fi
 
     cp $OUT_TMP_FILE $OUT_FILE
-    printf '\nConverting GfwList to '$OUT_TYPE'... ' && _green 'Done\n\n'
+    printf '\nConverting GfwList to '$OUT_TYPE'... ' && _green 'Done\n'
+    
+    # Delete apple ip avoid service unavailable
+    sed -i '/apple.com/d' $OUT_FILE
+    printf '\nApple ip discarded\n'
+    
+    # Restart dns service
+    service dnsmasq restart
+    printf '\nDnsmasq service restarted\n\n'
 
-    # Clean up
+
+    # Clean up                                                                                                                                                                                                                                                                  
     clean_and_exit 0
+    
 }
 
 main() {
-    if [ -z "$1" ]; then
-        usage 0
-    else
-        check_depends
-        get_args "$@"
-        _green '\nJob Started.\n\n'
-        process
-    fi
+    check_depends
+    get_args "$@"
+    _green '\nJob Started.\n\n'
+    process
 }
 
 main "$@"
