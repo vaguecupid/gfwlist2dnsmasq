@@ -35,13 +35,15 @@ Website:     https://github.com/cokebar
 
 Usage: sh gfwlist2dnsmasq.sh [options] -o FILE
 Valid options are:
+   
+                Defalut for unifi USG Policy-Based Routing (Default: without options)
     -d, --dns <dns_ip>
                 DNS IP address for the GfwList Domains (Default: 127.0.0.1)
     -p, --port <dns_port>
                 DNS Port for the GfwList Domains (Default: 5353)
     -s, --ipset <ipset_name>
                 Ipset name for the GfwList domains
-                (If not given, ipset rules will not be generated.)
+                (If give '', ipset rules will not be generated. The default is gfwlist)
     -o, --output <FILE>
                 /path/to/output_filename
     -i, --insecure
