@@ -1,3 +1,21 @@
+定时启动（每天5点）：
+0  5    * * *   root    /config/scripts/post-config.d/gfwlist2dnsmasq.sh
+
+也可通过以下命令设置策略路由：
+configure
+set firewall group address-group gfwlist
+set protocols static table 5 route 0.0.0.0/0 next-hop 192.168.1.254
+set firewall modify AUTO_GW rule 2000 action modify
+set firewall modify AUTO_GW rule 2000 destination group address-group gfwlist
+set firewall modify AUTO_GW rule 2000 modify table 5
+set firewall modify AUTO_GW rule 2000 protocol all
+set interfaces ethernet eth1 firewall in modify AUTO_GW
+commit;save;exit
+
+
+service dnsmasq restart
+
+
 # gfwlist2dnsmasq
 A shell script which convert gfwlist into dnsmasq rules.
 
