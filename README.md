@@ -24,6 +24,9 @@ commit;save;exit
 
 service dnsmasq restart
 
+输出配置：
+mca-ctrl -t dump-cfg
+
 
 # gfwlist2dnsmasq
 A shell script which convert gfwlist into dnsmasq rules.
