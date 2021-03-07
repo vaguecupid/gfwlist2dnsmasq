@@ -1,0 +1,53 @@
+{
+        "firewall": {
+                "group": {
+                        "address-group": {
+                                "gfwlist": "''"
+                        }
+                },
+                "modify": {
+                        "AUTO_GW": {
+                                "rule": {
+                                        "2000": {
+                                                "action": "modify",
+                                                "destination": {
+                                                        "group": {
+                                                                "address-group": "gfwlist"
+                                                        }
+                                                },
+                                                "modify": {
+                                                        "table": "1"
+                                                },
+                                                "protocol": "all"
+                                        }
+                                }
+                        }
+                }
+        },
+        "interfaces": {
+                "ethernet": {
+                        "eth1": {
+                                "firewall": {
+                                        "in": {
+                                                "modify": "AUTO_GW"
+                                        }
+                                }
+                        }
+                }
+        },
+        "protocols": {
+                "static": {
+                        "table": {
+                                "1": {
+                                        "route": {
+                                                "0.0.0.0/0": {
+                                                        "next-hop": {
+                                                                "192.168.1.254": "''"
+                                                        }
+                                                }
+                                        }
+                                }
+                        }
+                }
+        }
+}
