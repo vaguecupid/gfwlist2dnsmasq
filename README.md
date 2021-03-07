@@ -2,6 +2,7 @@
 0  5    * * *   root    /config/scripts/post-config.d/gfwlist2dnsmasq.sh
 
 也可通过以下命令设置策略路由：
+
 configure
 
 set firewall group address-group gfwlist
