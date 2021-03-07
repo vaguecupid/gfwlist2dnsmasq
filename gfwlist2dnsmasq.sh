@@ -317,9 +317,9 @@ ipset=/\1/'$IPSET_NAME'#g' > $CONF_TMP_FILE
     cp $OUT_TMP_FILE $OUT_FILE
     printf '\nConverting GfwList to '$OUT_TYPE'... ' && _green 'Done\n'
     
-    # Delete apple ip avoid service unavailable
-    sed -i '/apple.com/d' $OUT_FILE
-    printf '\nApple ip discarded\n'
+    # Delete apple&m-team ip avoid service unavailable
+    sed -i '/\(apple.com\|m-team.cc\)/d' $OUT_FILE
+    printf '\nApple & m-team ip discarded\n'
     
     # Restart dns service
     service dnsmasq restart
